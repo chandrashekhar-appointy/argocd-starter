@@ -1,49 +1,52 @@
-apiVersion: argoproj.io/v1alpha1 
-kind: Application 
-metadata: 
-  name: cadence 
-  namespace: argocd 
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cadence
+  namespace: argocd
 
   finalizers:
     - resources-finalizer.argocd.argoproj.io
-  
-spec: 
-  project: default 
-  source: 
-    repoURL: https://cadence-workflow.github.io/cadence-charts 
-    targetRevision: 1.0.8
-    chart: cadence 
-    helm: 
-      valueFiles: 
-        - $values/cadence/values.yaml
-      releaseName: cadence 
-  
+
+spec:
+  project: default
+
+  # Multi-source configuration - use ONLY sources (plural)
   sources:
+    # Source 1: Helm chart repository
+    - repoURL: https://cadence-workflow.github.io/cadence-charts
+      targetRevision: 1.0.8
+      chart: cadence
+      helm:
+        valueFiles:
+          - $values/cadence/values.yaml
+        releaseName: cadence
+
+    # Source 2: Your Git repo with custom values
     - repoURL: https://github.com/chandrashekhar-appointy/argocd-starter
       targetRevision: HEAD
       ref: values
-  
-  destination: 
-    server: https://kubernetes.default.svc
-    namespace: cadence 
 
-  syncPolicy: 
-    automated: 
-      prune: true 
-      selfHeal: true 
-      allowEmpty: false 
-  
-    syncOptions: 
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: cadence
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+
+    syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true
       - ApplyOutOfSyncOnly=true
 
-    retry: 
-      limit: 5 
-      backoff: 
-        duration: 3s 
+    retry:
+      limit: 5
+      backoff:
+        duration: 3s
         factor: 2
-        maxDuration: 3m 
+        maxDuration: 3m
 
   ignoreDifferences:
     - group: apps
