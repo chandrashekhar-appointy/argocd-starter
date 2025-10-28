@@ -8,7 +8,7 @@ metadata:
     - resources-finalizer.argocd.argoproj.io
 
 spec:
-  project: default
+  project: myproject                 # Moved from default to myproject for RBAC
 
   # Multi-source configuration - use ONLY sources (plural)
   sources:
