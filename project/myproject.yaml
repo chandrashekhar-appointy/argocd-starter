@@ -1,0 +1,66 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: myproject
+  namespace: argocd                  # Fixed: was "labels: argocd"
+
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+
+spec:
+  description: My project for POC
+
+  # SOURCE REPOSITORIES: Which Git/Helm repos are allowed
+  sourceRepos:
+    - https://cadence-workflow.github.io/cadence-charts
+    - https://github.com/chandrashekhar-appointy/argocd-starter
+
+  # DESTINATIONS: Where applications can be deployed (fixed syntax)
+  destinations:                      # Fixed: was "destination" (singular)
+    - namespace: '*'                 # Allow all namespaces (for learning)
+      server: https://kubernetes.default.svc 
+    
+  clusterResourceWhitelist: 
+    - group: ''
+      kind: Namespace 
+
+  namespaceResourceWhitelist:
+    - group: '*'
+      kind: '*'
+  
+  roles: 
+    - name: devopsreader 
+      description: Devops team member - can view and sync, cannot delete 
+      policies:
+        # Allow getting/viewing applications in this project
+        - p, proj:myproject:devopsreader, applications, get, myproject/*, allow
+
+        # Allow syncing applications
+        - p, proj:myproject:devopsreader, applications, sync, myproject/*, allow
+
+        # Allow updating app specs (e.g., changing sync options)
+        - p, proj:myproject:devopsreader, applications, update, myproject/*, allow
+
+        # Allow viewing logs
+        - p, proj:myproject:devopsreader, logs, get, myproject/*, allow
+
+        # DENY delete - this is the key restriction!
+        - p, proj:myproject:devopsreader, applications, delete, myproject/*, deny
+
+        # DENY create - cannot create new apps
+        - p, proj:myproject:devopsreader, applications, create, myproject/*, deny
+
+    - name: developer
+      description: Developer role - read-only access for testing
+      policies:
+        # Allow viewing applications
+        - p, proj:myproject:developer, applications, get, myproject/*, allow
+
+        # Allow viewing logs
+        - p, proj:myproject:developer, logs, get, myproject/*, allow
+
+        # Deny all modification actions
+        - p, proj:myproject:developer, applications, sync, myproject/*, deny
+        - p, proj:myproject:developer, applications, delete, myproject/*, deny
+        - p, proj:myproject:developer, applications, create, myproject/*, deny
+        - p, proj:myproject:developer, applications, update, myproject/*, deny
