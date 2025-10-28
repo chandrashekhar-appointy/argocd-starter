@@ -4,23 +4,23 @@ metadata:
   name: cadence 
   namespace: argocd 
 
-  finalizer:
+  finalizers:
     - resources-finalizer.argocd.argoproj.io
   
 spec: 
   project: default 
   source: 
     repoURL: https://cadence-workflow.github.io/cadence-charts 
-    targetVersion: 1.0.8
+    targetRevision: 1.0.8
     chart: cadence 
     helm: 
       valueFiles: 
         - $values/cadence/values.yaml
       releaseName: cadence 
   
-  sources: 
+  sources:
     - repoURL: https://github.com/chandrashekhar-appointy/argocd-starter
-      targerRevision: HEAD 
+      targetRevision: HEAD
       ref: values
   
   destination: 
