@@ -1,0 +1,57 @@
+server:
+  # Number of replicas for each service
+  replicaCount: 1              # Start with 1 for learning (increase for production)
+
+  # Resource limits (important for production)
+  resources:
+    limits:
+      cpu: 500m                # Max CPU (500 millicores = 0.5 CPU)
+      memory: 512Mi            # Max memory
+    requests:
+      cpu: 250m                # Requested CPU (guaranteed)
+      memory: 256Mi            # Requested memory (guaranteed)
+
+# CASSANDRA: Cadence's primary database (enabled by default)
+cassandra:
+  enabled: true                # Use bundled Cassandra (for learning/dev)
+  # For production, use external managed Cassandra and set enabled: false
+
+  persistence:
+    enabled: true              # Enable persistent storage (data survives pod restarts)
+    storageClass: standard     # Storage class (use 'kubectl get sc' to see available)
+    size: 10Gi                 # Disk size for Cassandra data
+
+  resources:
+    limits:
+      cpu: 500m
+      memory: 1Gi
+    requests:
+      cpu: 250m
+      memory: 512Mi
+
+# WEB UI: Cadence web interface (optional but very useful!)
+web:
+  enabled: true                # Enable web UI for viewing workflows
+  replicaCount: 1
+
+  service:
+    type: LoadBalancer         # Expose via LoadBalancer (for GKE)
+    # Alternative: type: ClusterIP (use with port-forward)
+    # Alternative: type: NodePort (for on-prem/local clusters)
+
+  ingress:
+    enabled: false             # Set true if you have Ingress controller
+    # hosts:
+    #   - cadence.example.com
+
+# PROMETHEUS: Metrics (optional)
+prometheus:
+  enabled: false               # Disable for now (enable later for monitoring)
+
+# GRAFANA: Dashboards (optional)
+grafana:
+  enabled: false               # Disable for now (enable later for visualization)
+
+# MySQL: Alternative to Cassandra (choose one)
+mysql:
+  enabled: false               # We're using Cassandra, so disable MySQL
